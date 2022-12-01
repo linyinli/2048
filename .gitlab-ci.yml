@@ -1,0 +1,11 @@
+stages:
+  - compile
+
+compile:
+  stage: compile
+  image: maven:3-jdk-7
+  artifacts:
+    paths:
+      - target/
+  script:
+    - mvn clean package

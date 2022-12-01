@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: game2048
+  name: game2048
+  namespace: game2048
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: game2048
+  template:
+    metadata:
+      labels:
+        app: game2048
+    spec:
+      containers:
+      - name: game2048
+        image: liyinlin/game2048:v2
+        ports:
+        - name: http-8080
+          containerPort: 8080
+          protocol: TCP
