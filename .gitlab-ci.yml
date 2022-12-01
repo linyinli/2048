@@ -1,11 +1,44 @@
 stages:
-  - compile
+  - compile
+  - build
+  - deploy
 
 compile:
-  stage: compile
-  image: maven:3-jdk-7
-  artifacts:
-    paths:
-      - target/
-  script:
-    - mvn clean package
+  stage: compile
+  image: maven:3-openjdk-8
+  artifacts:
+    paths:
+      - target/
+  script:
+    - mvn clean package
+
+build:
+  dependencies:
+  - compile
+  stage: build
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [""]
+  artifacts:
+    paths:
+      - target/
+  before_script:
+    - mkdir -p /kaniko/.docker
+    - echo "{\"auths\":{\"https://index.docker.io/v1/\":{\"auth\":\"$(printf "%s:%s" "${DOCKERHUB_USERNAME}" "${DOCKERHUB_PASSWORD}" | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
+  script:
+    - /kaniko/executor
+      --context "${CI_PROJECT_DIR}"
+      --dockerfile "${CI_PROJECT_DIR}/Dockerfile"
+      --destination "liyinlin/game2048:${CI_COMMIT_SHORT_SHA}"
+
+
+deploy:
+  stage: deploy
+  image: liyinlin/kubetoolbox:kubectl
+  script:
+    - >-
+      curl --insecure -LSs -X POST -H 'Accept: application/json' -H 'Content-Type: application/json'
+      -u ${RANCHER_TOKEN} ${RANCHER_URL}/v3/clusters/c-r7flr?action=generateKubeconfig
+      | jq -r .config > ~/.kube/config
+    - sed -i "s/\$tag/${CI_COMMIT_SHORT_SHA}/g" manifests/deployment.yaml
+    - kubectl apply -f manifests/
