@@ -34,11 +34,17 @@ build:
 
 deploy:
   stage: deploy
-  image: liyinlin/kubetoolbox:kubectl
+  image: liyinlin/kubetoolbox:iac
   script:
+    - seal config setup -s ${SEAL_URL} --insecure --token ${SEAL_TOKEN} -p ${SEAL_PROJECT} -e ${SEAL_PROJECT_ENV}
     - >-
-      curl --insecure -LSs -X POST -H 'Accept: application/json' -H 'Content-Type: application/json'
-      -u ${RANCHER_TOKEN} ${RANCHER_URL}/v3/clusters/c-r7flr?action=generateKubeconfig
-      | jq -r .config > ~/.kube/config
-    - sed -i "s/\$tag/${CI_COMMIT_SHORT_SHA}/g" manifests/deployment.yaml
-    - kubectl apply -f manifests/
+      seal service create 
+      --name ${SEAL_SERVICE_NAME}
+      --template '{"id": "webservice", "version": "0.0.4"}' 
+      --attributes '{"image": "liyinlin/game2048:'${CI_COMMIT_SHORT_SHA}'", "ports": ["8080"]}'
+#    - >-
+#      curl --insecure -LSs -X POST -H 'Accept: application/json' -H 'Content-Type: application/json'
+#      -u ${RANCHER_TOKEN} ${RANCHER_URL}/v3/clusters/${RANCHER_CLUSTER_ID}?action=generateKubeconfig
+#      | jq -r .config > ~/.kube/config 
+#    - sed -i "s/\$tag/${CI_COMMIT_SHORT_SHA}/g" manifests/deployment.yaml
+#    - kubectl apply -f manifests/
