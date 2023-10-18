@@ -36,10 +36,10 @@ deploy:
   stage: deploy
   image: liyinlin/kubetoolbox:iac
   script:
-    - seal config setup -s ${SEAL_URL} --insecure --token ${SEAL_TOKEN} -p ${SEAL_PROJECT} -e ${SEAL_PROJECT_ENV}
+    - walrus config setup -s ${WALRUS_URL} --insecure --token ${WALRUS_API_TOKEN} -p ${WALRUS_PROJECT} -e ${WALRUS_PROJECT_ENV}
     - >-
-      seal service create 
-      --name ${SEAL_SERVICE_NAME}
+      walrus service create 
+      --name ${WALRUS_SERVICE_NAME}
       --template '{"id": "webservice", "version": "0.0.4"}' 
       --attributes '{"image": "liyinlin/game2048:'${CI_COMMIT_SHORT_SHA}'", "ports": ["8080"]}'
 #    - >-
