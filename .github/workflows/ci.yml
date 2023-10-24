@@ -31,5 +31,5 @@ jobs:
         password: ${{ secrets.CI_DOCKER_PASSWORD }}
     - name: Build and push Docker image
       run: |
-        docker build . --file Dockerfile --tag ${{ env.CI_IMAGE_NAME }}:${{ GITHUB_RUN_ID }}
-        docker push ${{ env.CI_IMAGE_NAME }}:${{ GITHUB_RUN_ID }}
+        docker build . --file Dockerfile --tag ${{ env.CI_IMAGE_NAME }}:${{ github.run_id }}
+        docker push ${{ env.CI_IMAGE_NAME }}:${{ github.run_id }}
