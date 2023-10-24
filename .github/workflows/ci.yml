@@ -39,13 +39,13 @@ jobs:
         docker push ${{ env.CI_IMAGE_NAME }}:${{ github.run_id }}
     - name: Download CLI
       run: |
-       # Download walrus CLI
-       curl -v -k -o walrus -LO "${{ secrets.CI_WALRUS_SERVER }}/cli?arch=amd64&os=linux"
-       chmod +x ./walrus
+        # Download walrus CLI
+        curl -v -k -o walrus -LO "${{ secrets.CI_WALRUS_SERVER }}/cli?arch=amd64&os=linux"
+        chmod +x ./walrus
     - name: Deploy
       run: |
         # Setup CLI config
         ./walrus config setup --server ${{ secrets.CI_WALRUS_SERVER }} --token ${{ secrets.CI_WALRUS_TOKEN }} --project ${{ env.CI_WALRUS_PROJECT }} --environment ${{ env.CI_WALRUS_ENV }}
        
-       # Deploy app
-       ./walrus service create --debug --name ${{ env.CI_WALRUS_SERVICE_NAME }} --template '{"name": "webservice", "version": "0.0.4"}' --attributes '{"image": "${{ env.CI_IMAGE_NAME }}:${{ github.run_id }}", "ports": ["8080"]}'
+        # Deploy app
+        ./walrus service create --debug --name ${{ env.CI_WALRUS_SERVICE_NAME }} --template '{"name": "webservice", "version": "0.0.4"}' --attributes '{"image": "${{ env.CI_IMAGE_NAME }}:${{ github.run_id }}", "ports": ["8080"]}'
