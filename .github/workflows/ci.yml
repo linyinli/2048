@@ -49,7 +49,7 @@ jobs:
     - name: Deploy
       run: |
         # Setup CLI config
-        ./walrus config setup --server ${{ secrets.CI_WALRUS_SERVER }} --token ${{ secrets.CI_WALRUS_TOKEN }} --project ${{ env.CI_WALRUS_PROJECT }} --environment ${{ env.CI_WALRUS_ENV }}
+        ./walrus config setup --insecure --server ${{ secrets.CI_WALRUS_SERVER }} --token ${{ secrets.CI_WALRUS_TOKEN }} --project ${{ env.CI_WALRUS_PROJECT }} --environment ${{ env.CI_WALRUS_ENV }}
        
         # Deploy app
         ./walrus service create --debug --name ${{ env.CI_WALRUS_SERVICE_NAME }} --template '{"name": "webservice", "version": "v0.0.2"}' --attributes '{"image": "${{ env.CI_IMAGE_NAME }}:${{ github.run_id }}", "ports": ["8080"]}'
