@@ -15,7 +15,7 @@ env:
   
 
 jobs:
-  build:
+  delivery:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -37,10 +37,6 @@ jobs:
       run: |
         docker build . --file Dockerfile --tag ${{ env.CI_IMAGE_NAME }}:${{ github.run_id }}
         docker push ${{ env.CI_IMAGE_NAME }}:${{ github.run_id }}
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
     - name: Download CLI
       run: |
         # Download walrus CLI
