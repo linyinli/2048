@@ -36,11 +36,11 @@ deploy:
   stage: deploy
   image: liyinlin/kubetoolbox:iac
   script:
-    - walrus config setup -s ${WALRUS_URL} --insecure --token ${WALRUS_API_TOKEN} -p ${WALRUS_PROJECT} -e ${WALRUS_PROJECT_ENV}
+    - walrus config setup --insecure -s ${WALRUS_URL} --insecure --token ${WALRUS_API_TOKEN} -p ${WALRUS_PROJECT} -e ${WALRUS_PROJECT_ENV}
     - >-
       walrus service create 
       --name ${WALRUS_SERVICE_NAME}
-      --template '{"id": "webservice", "version": "0.0.4"}' 
+      --template '{"name": "webservice", "version": "v0.0.2"}' 
       --attributes '{"image": "liyinlin/game2048:'${CI_COMMIT_SHORT_SHA}'", "ports": ["8080"]}'
 #    - >-
 #      curl --insecure -LSs -X POST -H 'Accept: application/json' -H 'Content-Type: application/json'
