@@ -10,10 +10,9 @@ env:
   CI_REGISTRY: ''
   CI_IMAGE_NAME: liyinlin/game2048
   CD_WALRUS_PROJECT: demo
-  CD_WALRUS_ENV: dev
+  CD_WALRUS_PROJECT_ENV: dev
   CD_WALRUS_SERVICE_NAME: game2048
   
-
 jobs:
   delivery:
     runs-on: ubuntu-latest
@@ -30,9 +29,9 @@ jobs:
     - name: Docker Login
       uses: docker/login-action@v3.0.0
       with:
-        registry: ${{ env.REGISTRY }}
-        username: ${{ secrets.CI_DOCKER_USERNAME }}
-        password: ${{ secrets.CI_DOCKER_PASSWORD }}
+        registry: ${{ env.CI_REGISTRY }}
+        username: ${{ secrets.CI_REGISTRY_USERNAME }}
+        password: ${{ secrets.CI_REGISTRY_PASSWORD }}
     - name: Build and push Docker image
       run: |
         docker build . --file Dockerfile --tag ${{ env.CI_IMAGE_NAME }}:${{ github.run_id }}
@@ -45,7 +44,7 @@ jobs:
     - name: Deploy
       run: |
         # Setup CLI config
-        ./walrus config setup --insecure --server ${{ secrets.CD_WALRUS_SERVER }} --token ${{ secrets.CD_WALRUS_TOKEN }} --project ${{ env.CD_WALRUS_PROJECT }} --environment ${{ env.CD_WALRUS_ENV }}
+        ./walrus config setup --insecure --server ${{ secrets.CD_WALRUS_SERVER }} --token ${{ secrets.CD_WALRUS_TOKEN }} --project ${{ env.CD_WALRUS_PROJECT }} --environment ${{ env.CD_WALRUS_PROJECT_ENV }}
        
         # Deploy app
         ./walrus service create --debug --name ${{ env.CD_WALRUS_SERVICE_NAME }} --template '{"name": "webservice", "version": "v0.0.2"}' --attributes '{"image": "${{ env.CI_IMAGE_NAME }}:${{ github.run_id }}", "ports": ["8080"]}'
