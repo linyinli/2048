@@ -4,7 +4,7 @@ stages:
   - deploy
 
 variables:
-  CI_PROJECT_DIR: ./
+  CI_WORKING_DIR: ./
   CI_IMAGE_NAME: liyinlin/game2048
   CD_WALRUS_PROJECT: default
   CD_WALRUS_PROJECT_ENV: local
@@ -33,8 +33,8 @@ build:
     - echo "{\"auths\":{\"https://index.docker.io/v1/\":{\"auth\":\"$(printf "%s:%s" "${CI_REGISTRY_USERNAME}" "${CI_REGISTRY_PASSWORD}" | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
   script:
     - /kaniko/executor
-      --context "${CI_PROJECT_DIR}"
-      --dockerfile "${CI_PROJECT_DIR}/Dockerfile"
+      --context "${CI_WORKING_DIR}"
+      --dockerfile "${CI_WORKING_DIR}/Dockerfile"
       --destination "${CI_IMAGE_NAME}:${CI_COMMIT_SHORT_SHA}"
 
 deploy:
