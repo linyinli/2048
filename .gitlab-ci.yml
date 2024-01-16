@@ -3,6 +3,12 @@ stages:
   - build
   - deploy
 
+variables:
+  CI_PROJECT_DIR: ./
+  CI_IMAGE_NAME: liyinlin/game2048
+  CD_WALRUS_PROJECT: default
+  CD_WALRUS_PROJECT_ENV: local
+
 compile:
   stage: compile
   image: maven:3-openjdk-8
@@ -24,27 +30,19 @@ build:
       - target/
   before_script:
     - mkdir -p /kaniko/.docker
-    - echo "{\"auths\":{\"https://index.docker.io/v1/\":{\"auth\":\"$(printf "%s:%s" "${DOCKERHUB_USERNAME}" "${DOCKERHUB_PASSWORD}" | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
+    - echo "{\"auths\":{\"https://index.docker.io/v1/\":{\"auth\":\"$(printf "%s:%s" "${CI_REGISTRY_USERNAME}" "${CI_REGISTRY_PASSWORD}" | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
   script:
     - /kaniko/executor
       --context "${CI_PROJECT_DIR}"
       --dockerfile "${CI_PROJECT_DIR}/Dockerfile"
-      --destination "liyinlin/game2048:${CI_COMMIT_SHORT_SHA}"
-
+      --destination "${CI_IMAGE_NAME}:${CI_COMMIT_SHORT_SHA}"
 
 deploy:
   stage: deploy
-  image: liyinlin/kubetoolbox:iac
+  image: alpine
+  before_script:
+    - wget -O walrus --no-check-certificate "https://walrus.sealio.net/cli?arch=amd64&os=linux"
+    - chmod +x ./walrus
   script:
-    - walrus config setup --insecure -s ${WALRUS_URL} --insecure --token ${WALRUS_API_TOKEN} -p ${WALRUS_PROJECT} -e ${WALRUS_PROJECT_ENV}
-    - >-
-      walrus service create 
-      --name ${WALRUS_SERVICE_NAME}
-      --template '{"name": "webservice", "version": "v0.0.2"}' 
-      --attributes '{"image": "liyinlin/game2048:'${CI_COMMIT_SHORT_SHA}'", "ports": ["8080"]}'
-#    - >-
-#      curl --insecure -LSs -X POST -H 'Accept: application/json' -H 'Content-Type: application/json'
-#      -u ${RANCHER_TOKEN} ${RANCHER_URL}/v3/clusters/${RANCHER_CLUSTER_ID}?action=generateKubeconfig
-#      | jq -r .config > ~/.kube/config 
-#    - sed -i "s/\$tag/${CI_COMMIT_SHORT_SHA}/g" manifests/deployment.yaml
-#    - kubectl apply -f manifests/
+    - ./walrus login --insecure --server ${CD_WALRUS_SERVER} --token ${CD_WALRUS_TOKEN}
+    - ./walrus apply -f ./walrus-file.yaml -p ${CD_WALRUS_PROJECT} -e ${CD_WALRUS_PROJECT_ENV}
