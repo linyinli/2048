@@ -1,19 +1,16 @@
 version: v1
 resources:
 - name: game2048
-  template:
-    name: kubernetes-containerservice
-    version: v0.2.4
+  type: containerservice
   attributes:
     containers:
-    - image: ${CI_IMAGE_NAME}:${CI_COMMIT_SHORT_SHA}
+    - profile: run
+      image: ${CI_IMAGE_NAME}:${CI_COMMIT_SHORT_SHA}
       ports:
       - schema: http
-        internal: 8080
         external: 8080
+        internal: 8080
         protocol: tcp
       resources:
-        cpu: 0.1
-        memory: 256
-    deployment:
-      replicas: 1
+        cpu: 0.25
+        memory: 512
